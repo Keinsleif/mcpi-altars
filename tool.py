@@ -39,8 +39,8 @@ def put_pos():
 		mc.events.clearAll()
 		while True:
 			events=mc.events.pollBlockHits()
-			for e in events:
-				mc.postToChat("x:"+str(e.pos.x)+" y:"+str(e.pos.y)+" z:"+str(e.pos.z))
+			[mc.postToChat("x:"+str(e.pos.x)+" y:"+str(e.pos.y)+" z:"+str(e.pos.z)) for e in events]
+
 	except KeyboardInterrupt:
 		print()
 
@@ -49,9 +49,7 @@ def put_block_id():
 		mc.events.clearAll()
 		while True:
 			events=mc.events.pollBlockHits()
-			for e in events:
-				b=mc.getBlock(e.pos.x,e.pos.y,e.pos.z)
-				mc.postToChat(str(b))
+			[mc.postToChat(str(mc.getBlock(e.pos.x,e.pos.y,e.pos.z))) for e in events]
 	except KeyboardInterrupt:
 		print()
 

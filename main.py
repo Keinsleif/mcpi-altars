@@ -1,35 +1,23 @@
 #!/usr/bin/python3
 
 from mcpi import minecraft
-import os
-import sys
-import queue
-import json
+import os,sys,queue,json,time,threading
 
 
 def main(mc,q,wd):
 	os.chdir(wd)
 	sys.path.insert(1,wd)
-	d1=os.listdir("ritual")
-	d2=""
-	for i in d1:
-		r=i.split(".")[0]
-		if r or not r=="__pycache__":
-			d2=d2+"from ritual import "+r+"\n"
-	exec(d2)
 
-	with open("data/alter",'r') as f:
-#		dalter=f.read()
-#	dalter=dalter.replace("\n","")
-#	exec("alter="+dalter)
-		alter=json.load(f)
+	rituals={}
+	altar={}
+	files=[os.path.splitext(i)[0] for i in os.listdir("ritual")]
+	for i in files:
+		if i or not r=="__pycache__":
+			rituals[i]=import_module(i,"ritual")
+		with open("altar/"+i,'r') as f:
+			altar[i]=json.load(f)
 
-	e1="if False:\n	print('Error!')\n"
-	for i in alter:
-		e1=e1+"elif al=="+str(alter[i]["alter"])+":\n	mc.postToChat('Success')\n	"+alter[i]["function"]+"\n	mc.postToChat('Stopped')\n	mc.events.clearAll()\n"
-	e1=e1+"else:\n	mc.postToChat('Ritual not found.')"
-
-	mc.postToChat("Welcome to Minecraft Pi Alters.")
+	mc.postToChat("Welcome to Minecraft Pi Altars.")
 
 	mc.events.clearAll()
 	try:
@@ -37,17 +25,37 @@ def main(mc,q,wd):
 			events=mc.events.pollBlockHits()
 			for e in events:
 				if mc.getBlock(e.pos.x,e.pos.y,e.pos.z)==247:
-					al=[]
-					for y in range(e.pos.y,e.pos.y+3):
-						for x in range(e.pos.x-1,e.pos.x+2):
-							for z in range(e.pos.z-1,e.pos.z+2):
-								al.append(mc.getBlock(x,y,z))
-					exec(e1)
+					al=[mc.getBlock(x,y,z) for y in range(e.pos.y,e.pos.y+3) for x in range(e.pos.x-1,e.pos.x+2) for z in range(e.pos.z-1,e.pos.z+2)]
+					for i in files:
+						for a in alter[i]:
+							if al==alter[a]['altar']:
+								mc.postToChat('Success')
+								exec(altar[i][a]["function"].format(ritual="rituals['"+i+"']"))
+								mc.postToChat('Stopped')
+								mc.events.clearAll()
+								break
+						else:
+							continue
+						break
+					else:
+						mc.postToChat('Ritual not found.')
+			time.sleep(0.5)
 	except KeyboardInterrupt:
 		print()
 
 if __name__=="__main__":
 	mc=minecraft.Minecraft.create()
 	qu=queue.Queue()
-	main(mc,qu,os.getcwd())
-
+	thread=threading.Thread(target=main,args=(mc,qu,os.getcwd()))
+	thread.start()
+	while True:
+		try:
+			com=input("> ")
+			if com=="exit":
+				qu.put(0)
+				thread.join()
+				sys.exit()
+		except KeyboardInterrupt:
+			qu.put(0)
+			thread.join()
+			sys.exit()
