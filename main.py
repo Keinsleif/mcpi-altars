@@ -27,8 +27,8 @@ def main(mc,q,wd):
 				if mc.getBlock(e.pos.x,e.pos.y,e.pos.z)==247:
 					al=[mc.getBlock(x,y,z) for y in range(e.pos.y,e.pos.y+3) for x in range(e.pos.x-1,e.pos.x+2) for z in range(e.pos.z-1,e.pos.z+2)]
 					for i in files:
-						for a in alter[i]:
-							if al==alter[a]['altar']:
+						for a in altar[i]:
+							if al==altar[a]['altar']:
 								mc.postToChat('Success')
 								exec(altar[i][a]["function"].format(ritual="rituals['"+i+"']"))
 								mc.postToChat('Stopped')
