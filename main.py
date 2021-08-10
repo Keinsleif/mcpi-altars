@@ -2,6 +2,7 @@
 
 from mcpi import minecraft
 import os,sys,queue,json,time,threading
+from importlib import import_module
 from multiprocessing import Value
 
 
